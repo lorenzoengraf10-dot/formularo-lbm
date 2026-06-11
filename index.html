@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Diagnóstico Digital — La Buena Medida</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rojo:    #B8271E;
+    --rojo-dk: #8C1A13;
+    --crema:   #F7F2EB;
+    --arena:   #E8DFD0;
+    --carbon:  #1E1A17;
+    --gris:    #6B625A;
+    --verde:   #2E6B3E;
+  }
+
+  body {
+    background: var(--crema);
+    font-family: 'Inter', sans-serif;
+    color: var(--carbon);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--rojo);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-badge {
+    width: 48px; height: 48px;
+    background: var(--crema);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .logo-badge svg { width: 28px; height: 28px; }
+  .header-text h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.25rem;
+    color: #fff;
+    line-height: 1.1;
+  }
+  .header-text p {
+    font-size: 0.72rem;
+    color: rgba(255,255,255,0.75);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* ── WRAPPER ── */
+  .wrapper {
+    max-width: 580px;
+    margin: 0 auto;
+    padding: 32px 20px 60px;
+  }
+
+  /* ── PROGRESS ── */
+  .progress-bar {
+    height: 4px;
+    background: var(--arena);
+    border-radius: 4px;
+    margin-bottom: 28px;
+    overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: var(--rojo);
+    border-radius: 4px;
+    transition: width 0.4s ease;
+  }
+  .step-label {
+    font-size: 0.72rem;
+    color: var(--gris);
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+
+  /* ── CARD ── */
+  .card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 28px 24px;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.07);
+  }
+  .card h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.35rem;
+    line-height: 1.3;
+    margin-bottom: 6px;
+  }
+  .card .sub {
+    font-size: 0.85rem;
+    color: var(--gris);
+    margin-bottom: 22px;
+    line-height: 1.5;
+  }
+
+  /* ── OPTIONS ── */
+  .options { display: flex; flex-direction: column; gap: 10px; }
+  .opt {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 14px 16px;
+    border: 2px solid var(--arena);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: border-color 0.18s, background 0.18s;
+    user-select: none;
+  }
+  .opt:hover { border-color: var(--rojo); background: #fdf5f4; }
+  .opt.selected { border-color: var(--rojo); background: #fdf5f4; }
+  .opt-icon {
+    font-size: 1.35rem;
+    line-height: 1;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .opt-text strong {
+    display: block;
+    font-size: 0.92rem;
+    font-weight: 600;
+    margin-bottom: 2px;
+  }
+  .opt-text span {
+    font-size: 0.78rem;
+    color: var(--gris);
+    line-height: 1.4;
+  }
+
+  /* ── MULTI-SELECT hint ── */
+  .multi-hint {
+    font-size: 0.75rem;
+    color: var(--gris);
+    margin-bottom: 14px;
+    font-style: italic;
+  }
+
+  /* ── BUTTONS ── */
+  .btn-row {
+    display: flex;
+    gap: 10px;
+    margin-top: 22px;
+  }
+  .btn-back {
+    flex: 0 0 auto;
+    padding: 12px 20px;
+    border: 2px solid var(--arena);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--gris);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .btn-back:hover { border-color: var(--gris); color: var(--carbon); }
+  .btn-next {
+    flex: 1;
+    padding: 14px;
+    background: var(--rojo);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: 'Inter', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.15s, opacity 0.15s;
+  }
+  .btn-next:disabled { opacity: 0.35; cursor: not-allowed; }
+  .btn-next:not(:disabled):hover { background: var(--rojo-dk); }
+
+  /* ── RESULTADO ── */
+  .result-header {
+    text-align: center;
+    margin-bottom: 24px;
+  }
+  .result-icon {
+    font-size: 3rem;
+    display: block;
+    margin-bottom: 10px;
+  }
+  .result-header h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.55rem;
+    color: var(--rojo);
+    margin-bottom: 6px;
+  }
+  .result-header p {
+    font-size: 0.88rem;
+    color: var(--gris);
+    line-height: 1.5;
+  }
+  .result-items { display: flex; flex-direction: column; gap: 12px; margin-bottom: 20px; }
+  .result-item {
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    padding: 14px;
+    border-radius: 10px;
+    border-left: 4px solid var(--rojo);
+    background: #fdf8f4;
+  }
+  .result-item .ri-icon { font-size: 1.3rem; flex-shrink: 0; margin-top: 1px; }
+  .result-item strong { display: block; font-size: 0.9rem; margin-bottom: 3px; }
+  .result-item span { font-size: 0.78rem; color: var(--gris); line-height: 1.4; }
+  .result-item.bonus { border-left-color: var(--verde); background: #f3faf5; }
+
+  .cta-box {
+    background: var(--rojo);
+    border-radius: 10px;
+    padding: 20px;
+    text-align: center;
+    color: #fff;
+    margin-top: 20px;
+  }
+  .cta-box p { font-size: 0.85rem; opacity: 0.85; margin-bottom: 12px; line-height: 1.4; }
+  .btn-wa {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #25D366;
+    color: #fff;
+    padding: 12px 22px;
+    border-radius: 8px;
+    font-family: 'Inter', sans-serif;
+    font-weight: 600;
+    font-size: 0.92rem;
+    text-decoration: none;
+    transition: opacity 0.15s;
+  }
+  .btn-wa:hover { opacity: 0.88; }
+
+  .restart-btn {
+    display: block;
+    width: 100%;
+    margin-top: 12px;
+    padding: 11px;
+    background: transparent;
+    border: 2px solid var(--arena);
+    border-radius: 8px;
+    color: var(--gris);
+    font-family: 'Inter', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+  .restart-btn:hover { border-color: var(--gris); }
+
+  /* ── SPLASH ── */
+  #splash { text-align: center; padding: 20px 0; }
+  #splash .meat-rule {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 28px;
+  }
+  #splash .meat-rule hr { flex: 1; border: none; border-top: 2px solid var(--arena); }
+  #splash .meat-rule span { font-size: 1.3rem; }
+  #splash h2 {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.55rem;
+    margin-bottom: 10px;
+    line-height: 1.3;
+  }
+  #splash p {
+    font-size: 0.88rem;
+    color: var(--gris);
+    line-height: 1.6;
+    margin-bottom: 28px;
+    max-width: 380px;
+    margin-left: auto; margin-right: auto;
+  }
+
+  .fade { animation: fadeIn 0.28s ease; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+  @media (max-width: 420px) {
+    .card { padding: 22px 18px; }
+    .card h2 { font-size: 1.2rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-badge">
+    <svg viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <path d="M5 22 C8 10, 20 10, 23 22" stroke="#B8271E" stroke-width="2.2" stroke-linecap="round"/>
+      <circle cx="14" cy="9" r="3.5" fill="#B8271E"/>
+    </svg>
+  </div>
+  <div class="header-text">
+    <h1>La Buena Medida</h1>
+    <p>Diagnóstico digital · Senko</p>
+  </div>
+</header>
+
+<div class="wrapper">
+  <div id="app"></div>
+</div>
+
+<script>
+const questions = [
+  {
+    id: "objetivo",
+    title: "¿Qué querés lograr con presencia digital?",
+    sub: "Elegí la opción que más se acerca a tu objetivo principal.",
+    type: "single",
+    options: [
+      { icon: "📣", label: "Que más gente me conozca", desc: "Llegar a nuevos clientes en la zona.", value: "visibilidad" },
+      { icon: "🛒", label: "Mostrar mis productos y precios", desc: "Un lugar donde la gente vea lo que tengo disponible.", value: "catalogo" },
+      { icon: "📲", label: "Que me contacten fácil", desc: "Pedidos por WhatsApp, consultas, reservas.", value: "contacto" },
+      { icon: "⭐", label: "Ganar confianza y reputación", desc: "Mostrar trayectoria, calidad y años de experiencia.", value: "confianza" },
+    ]
+  },
+  {
+    id: "publico",
+    title: "¿A quién le vendés más seguido?",
+    sub: "Podés elegir más de una.",
+    type: "multi",
+    options: [
+      { icon: "👩‍👧", label: "Familias y amas de casa", desc: "Compras semanales, cortes variados.", value: "familias" },
+      { icon: "👨‍🍳", label: "Asadores y parrilleros", desc: "Buscan el mejor corte para el asado.", value: "asadores" },
+      { icon: "💼", label: "Comercios y restaurantes", desc: "Compras en volumen, proveedores.", value: "comercios" },
+      { icon: "🧓", label: "Clientes de toda la vida", desc: "Vecinos de siempre, cortes económicos.", value: "fieles" },
+    ]
+  },
+  {
+    id: "contenido",
+    title: "¿Qué te gustaría mostrar?",
+    sub: "Elegí todo lo que tiene sentido para tu negocio.",
+    type: "multi",
+    options: [
+      { icon: "🥩", label: "Catálogo de cortes y precios", desc: "Lista actualizable con fotos y valores.", value: "catalogo" },
+      { icon: "📦", label: "Productos elaborados y chacinados", desc: "Chorizos, morcillas, salchichas, embutidos.", value: "elaborados" },
+      { icon: "📸", label: "Fotos del local y el equipo", desc: "Humanizar la marca, generar confianza.", value: "fotos" },
+      { icon: "🏆", label: "Historia y trayectoria", desc: "+46 años de experiencia en la comarca.", value: "historia" },
+      { icon: "📍", label: "Ubicación y horarios", desc: "Para que te encuentren fácil.", value: "ubicacion" },
+    ]
+  },
+  {
+    id: "gestion",
+    title: "¿Quién va a manejar el contenido después?",
+    sub: "Esto define qué tan simple o compleja tiene que ser la solución.",
+    type: "single",
+    options: [
+      { icon: "🙋", label: "Yo mismo, desde el celular", desc: "Necesito algo simple de actualizar.", value: "autonomo" },
+      { icon: "🤝", label: "Lo manejaría alguien de Senko", desc: "Prefiero delegar la gestión.", value: "delegado" },
+      { icon: "🔄", label: "Empezamos con ayuda y después vemos", desc: "Me gustaría aprender de a poco.", value: "mixto" },
+    ]
+  },
+  {
+    id: "urgencia",
+    title: "¿Cuándo querés arrancar?",
+    sub: "Para planificar tiempos y prioridades.",
+    type: "single",
+    options: [
+      { icon: "🚀", label: "Lo antes posible", desc: "Quiero tener algo funcionando pronto.", value: "urgente" },
+      { icon: "📅", label: "En las próximas semanas", desc: "Tenemos tiempo para planificarlo bien.", value: "normal" },
+      { icon: "🤔", label: "Todavía estoy evaluando", desc: "Quiero saber qué me conviene antes de decidir.", value: "explorando" },
+    ]
+  }
+];
+
+function calcResult(answers) {
+  const obj = answers.objetivo || "";
+  const cont = answers.contenido || [];
+  const pub = answers.publico || [];
+  const gest = answers.gestion || "";
+
+  const items = [];
+
+  if (obj === "visibilidad" || obj === "confianza" || cont.includes("historia") || cont.includes("ubicacion")) {
+    items.push({
+      icon: "🌐",
+      label: "Sitio web institucional",
+      desc: "Una página que cuente quiénes son, dónde están y por qué elegilos. Ideal para transmitir los 46 años de trayectoria.",
+      bonus: false
+    });
+  }
+
+  if (obj === "catalogo" || cont.includes("catalogo") || cont.includes("elaborados")) {
+    items.push({
+      icon: "📋",
+      label: "Catálogo digital de productos",
+      desc: "Lista de cortes y chacinados con fotos y precios, fácil de compartir por WhatsApp o Instagram.",
+      bonus: false
+    });
+  }
+
+  if (obj === "contacto" || pub.includes("asadores") || pub.includes("comercios")) {
+    items.push({
+      icon: "💬",
+      label: "Botón de pedido por WhatsApp",
+      desc: "Directo desde cualquier página o catálogo. Facilita el contacto para pedidos y consultas.",
+      bonus: false
+    });
+  }
+
+  if (pub.includes("familias") || pub.includes("asadores") || cont.includes("fotos")) {
+    items.push({
+      icon: "📱",
+      label: "Gestión de redes sociales",
+      desc: "Publicaciones con fotos de cortes, recetas, promociones y chacinados para mantener el local en la mente del cliente.",
+      bonus: false
+    });
+  }
+
+  if (gest === "autonomo") {
+    items.push({
+      icon: "✏️",
+      label: "Panel de edición simple",
+      desc: "Para que puedas actualizar precios y productos desde el celular sin depender de nadie.",
+      bonus: true
+    });
+  }
+  if (gest === "delegado" || gest === "mixto") {
+    items.push({
+      icon: "📊",
+      label: "Reporte mensual de métricas",
+      desc: "Cada mes te mostramos cuánta gente vio tu catálogo, de dónde vienen y qué más funciona.",
+      bonus: true
+    });
+  }
+
+  if (items.length === 0) {
+    items.push({
+      icon: "📋",
+      label: "Catálogo digital",
+      desc: "Un primer paso sencillo y efectivo para mostrar lo que tienen.",
+      bonus: false
+    });
+  }
+
+  return items;
+}
+
+let step = -1;
+let answers = {};
+let selections = {};
+
+function getWAText(items) {
+  const lines = items.map(i => `• ${i.label}`).join("\n");
+  return encodeURIComponent(`Hola! Hice el diagnóstico digital de La Buena Medida y me recomendaron:\n\n${lines}\n\nQuiero saber más.`);
+}
+
+function renderSplash() {
+  return `
+  <div id="splash" class="fade">
+    <div class="meat-rule"><hr><span>🥩</span><hr></div>
+    <h2>¿Qué presencia digital necesita La Buena Medida?</h2>
+    <p>Respondé 5 preguntas rápidas y te decimos qué herramientas digitales le convienen más a tu negocio.</p>
+    <button class="btn-next" style="max-width:320px;margin:0 auto;display:block;" onclick="startQuiz()">Empezar →</button>
+  </div>`;
+}
+
+function renderQuestion(q, idx) {
+  const total = questions.length;
+  const pct = ((idx) / total) * 100;
+  const sel = selections[q.id] || [];
+
+  const opts = q.options.map(o => `
+    <div class="opt ${sel.includes(o.value) ? 'selected' : ''}" onclick="toggleOpt('${q.id}','${o.value}','${q.type}')">
+      <div class="opt-icon">${o.icon}</div>
+      <div class="opt-text"><strong>${o.label}</strong><span>${o.desc}</span></div>
+    </div>
+  `).join('');
+
+  const backBtn = idx > 0 ? `<button class="btn-back" onclick="goBack()">← Atrás</button>` : '';
+  const multiHint = q.type === 'multi' ? `<p class="multi-hint">Podés elegir más de una opción.</p>` : '';
+
+  return `
+  <div class="fade">
+    <div class="progress-bar"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <p class="step-label">Paso ${idx + 1} de ${total}</p>
+    <div class="card">
+      <h2>${q.title}</h2>
+      <p class="sub">${q.sub}</p>
+      ${multiHint}
+      <div class="options">${opts}</div>
+      <div class="btn-row">
+        ${backBtn}
+        <button class="btn-next" id="btn-next" onclick="nextStep()" ${sel.length === 0 ? 'disabled' : ''}>
+          ${idx === total - 1 ? 'Ver resultado →' : 'Siguiente →'}
+        </button>
+      </div>
+    </div>
+  </div>`;
+}
+
+function renderResult() {
+  const items = calcResult(answers);
+  const waText = getWAText(items);
+  const waNumber = "542920347453";
+
+  const itemsHtml = items.map(i => `
+    <div class="result-item ${i.bonus ? 'bonus' : ''}">
+      <div class="ri-icon">${i.icon}</div>
+      <div><strong>${i.label}</strong><span>${i.desc}</span></div>
+    </div>
+  `).join('');
+
+  return `
+  <div class="fade">
+    <div class="progress-bar"><div class="progress-fill" style="width:100%"></div></div>
+    <div class="card">
+      <div class="result-header">
+        <span class="result-icon">🏆</span>
+        <h2>Tu diagnóstico digital</h2>
+        <p>Basado en tus respuestas, esto es lo que más le conviene a La Buena Medida:</p>
+      </div>
+      <div class="result-items">${itemsHtml}</div>
+      <div class="cta-box">
+        <p>¿Te interesa alguna de estas opciones? Hablamos sin compromiso.</p>
+        <a class="btn-wa" href="https://wa.me/${waNumber}?text=${waText}" target="_blank">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="white"><path d="M20.52 3.48A11.85 11.85 0 0012.05.02C5.5.02.16 5.36.16 11.92c0 2.1.55 4.15 1.59 5.96L.1 24l6.27-1.64a11.9 11.9 0 005.68 1.45h.01c6.55 0 11.88-5.34 11.88-11.9 0-3.18-1.24-6.17-3.42-8.39zm-8.47 18.3h-.01a9.87 9.87 0 01-5.03-1.38l-.36-.21-3.73.98 1-3.63-.24-.37a9.86 9.86 0 01-1.51-5.26c0-5.45 4.43-9.88 9.89-9.88 2.64 0 5.12 1.03 6.98 2.9a9.83 9.83 0 012.9 6.99c0 5.45-4.44 9.86-9.89 9.86zm5.42-7.4c-.3-.15-1.76-.87-2.03-.97-.27-.1-.47-.15-.67.15-.2.3-.77.97-.94 1.17-.17.2-.35.22-.65.07-.3-.15-1.26-.46-2.4-1.48-.89-.79-1.48-1.77-1.66-2.07-.17-.3-.02-.46.13-.61.13-.13.3-.35.44-.52.15-.17.2-.3.3-.5.1-.2.05-.37-.02-.52-.07-.15-.67-1.61-.92-2.2-.24-.58-.49-.5-.67-.51h-.57c-.2 0-.52.07-.79.37-.27.3-1.04 1.02-1.04 2.48s1.07 2.88 1.22 3.08c.15.2 2.1 3.2 5.08 4.49.71.31 1.27.49 1.7.63.71.23 1.36.2 1.87.12.57-.09 1.76-.72 2.01-1.41.25-.7.25-1.3.17-1.42-.07-.12-.27-.2-.57-.34z"/></svg>
+          Consultá por WhatsApp
+        </a>
+      </div>
+      <button class="restart-btn" onclick="restartQuiz()">↺ Volver a empezar</button>
+    </div>
+  </div>`;
+}
+
+function render() {
+  const app = document.getElementById('app');
+  if (step === -1) {
+    app.innerHTML = renderSplash();
+  } else if (step < questions.length) {
+    app.innerHTML = renderQuestion(questions[step], step);
+  } else {
+    app.innerHTML = renderResult();
+  }
+}
+
+function startQuiz() { step = 0; render(); }
+
+function toggleOpt(qid, val, type) {
+  if (!selections[qid]) selections[qid] = [];
+  if (type === 'single') {
+    selections[qid] = [val];
+  } else {
+    const idx = selections[qid].indexOf(val);
+    if (idx === -1) selections[qid].push(val);
+    else selections[qid].splice(idx, 1);
+  }
+  render();
+}
+
+function nextStep() {
+  const q = questions[step];
+  const sel = selections[q.id] || [];
+  if (sel.length === 0) return;
+
+  if (q.type === 'single') answers[q.id] = sel[0];
+  else answers[q.id] = sel;
+
+  step++;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function goBack() {
+  step--;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function restartQuiz() {
+  step = -1;
+  answers = {};
+  selections = {};
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+render();
+</script>
+</body>
+</html>
