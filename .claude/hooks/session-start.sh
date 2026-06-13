@@ -1,49 +1,46 @@
 #!/bin/bash
+# SessionStart hook — Claude Code on the web only.
 #
-# SessionStart hook for Claude Code on the web.
-#
-# Claude Code on the web runs in an ephemeral container: the home directory
-# (~/.claude, ~/.agents) is wiped every time the container is recycled, so
-# anything installed there does NOT persist on its own. This hook re-installs
-# the tools we want available in every session:
-#
-#   1. remotion-dev/skills  -> the "remotion-best-practices" skill (global)
-#   2. claude-mem           -> persistent memory plugin (~/.claude/plugins)
-#
-# Note: the Remotion skill is also committed to this repo under
-# .claude/skills (project scope), so it works even if the network install
-# below fails. This hook additionally installs it globally so it is available
-# across projects.
-#
-# Runs synchronously on purpose: Claude loads skills and plugins at session
-# start, so they must be installed BEFORE the session begins to be usable.
+# Re-installs ephemeral tools and restores the claude-mem database from
+# the in-repo backup so memories survive container recycles.
 
 set -uo pipefail
 
-# Only run in Claude Code on the web. Locally these tools persist across
-# sessions, so re-installing on every start is unnecessary.
 if [ "${CLAUDE_CODE_REMOTE:-}" != "true" ]; then
   exit 0
 fi
 
-# Send all install logs to stderr so they don't get injected into the session
-# context as SessionStart stdout.
 {
-  echo "[session-start] Installing persistent tools for Claude Code on the web..."
+  echo "[session-start] Bootstrapping persistent tools..."
 
-  # 1) Remotion best-practices skill (global / user scope).
+  # 1) Restore claude-mem database before installing, so the plugin picks it up.
+  BACKUP_DB="${CLAUDE_PROJECT_DIR}/.claude/mem-backup/claude-mem.db"
+  MEM_DIR="${HOME}/.claude-mem"
+  if [ -f "$BACKUP_DB" ]; then
+    mkdir -p "$MEM_DIR"
+    cp "$BACKUP_DB" "$MEM_DIR/claude-mem.db"
+    echo "[session-start] claude-mem.db restored from repo backup"
+  else
+    echo "[session-start] No backup found — fresh start for claude-mem"
+  fi
+
+  # 2) Remotion best-practices skill (global scope).
   if npx -y skills add remotion-dev/skills --global -y; then
     echo "[session-start] remotion-dev/skills installed OK"
   else
-    echo "[session-start] WARNING: failed to install remotion-dev/skills (continuing)"
+    echo "[session-start] WARNING: remotion-dev/skills install failed (continuing)"
   fi
 
-  # 2) claude-mem persistent memory plugin.
+  # 3) claude-mem plugin.
   if npx -y claude-mem install; then
     echo "[session-start] claude-mem installed OK"
   else
-    echo "[session-start] WARNING: failed to install claude-mem (continuing)"
+    echo "[session-start] WARNING: claude-mem install failed (continuing)"
   fi
+
+  # 4) Start claude-mem worker in background.
+  npx claude-mem start &>/dev/null &
+  echo "[session-start] claude-mem worker started (PID $!)"
 
   echo "[session-start] Done."
 } >&2
